@@ -1,5 +1,5 @@
 import cv2
-
+from cv2 import cv2 as cv2
 
 def video2frames(videoname, num):
     print(cv2.__version__)

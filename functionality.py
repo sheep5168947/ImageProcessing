@@ -1,8 +1,12 @@
 import numpy as np
 import os
 from PIL import Image
-import cv2
+
+# -------------------------------------
+# 全域變數
 cross = 20
+
+#--------------------------------------
 # 定義那些放大啥小的功能
 
 
