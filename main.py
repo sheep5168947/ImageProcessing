@@ -7,7 +7,7 @@ import SpecialEffects
 # ------------------------------
 #宣告用
 videoname1 = 'ohoh.mp4'
-inputpath = ['data','ghost']
+inputpath = ['data','ghost','left-ghost','right-ghost','up-ghost']
 combineimg = "combine_img"
 outputname =  'newvideo.avi'
 fps = 29
@@ -18,7 +18,7 @@ fps = 29
 
 # ------------------------------
 # 這裡把圖片放上小人
-functionality.combine(inputpath[0],inputpath[1])
+functionality.combine(inputpath)
 
 
 #還有實作那些功能

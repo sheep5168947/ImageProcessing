@@ -109,7 +109,7 @@ def MosaicFun(imageData,maskSize=10):
                     SumB+=image[ai+i][aj][2].astype("int16")
         SumR=(SumR/size).astype('uint8')
         SumG=(SumG/size).astype('uint8')
-        SumB=(SumB/size).astype('uint8')         
+        SumB=(SumB/size).astype('uint8')
         for ai in range(mosaic_size):
             for aj in range(maxWight,len(image[0])):  
                 new_image[ai+i][aj][0]=SumR
@@ -122,26 +122,19 @@ def MosaicFun(imageData,maskSize=10):
     return new_image
 
 def hierarchyColor(imageData,level):
-    for i in range(len(imageData)):
+    level_2=int(level/2)
+    for i in range (len(imageData)):
         for j in range(len(imageData[0])):
-            imageData[i][j][0]=(int(imageData[i][j][0]/level)*level)
-            imageData[i][j][1]=(int(imageData[i][j][1]/level)*level)
-            imageData[i][j][2]=(int(imageData[i][j][2]/level)*level)
-            """
-            temp0=imageData[i][j][0]%level
-            temp1=imageData[i][j][1]%level
-            temp2=imageData[i][j][2]%level
-            imageData[i][j][0]-=temp0
-            imageData[i][j][1]-=temp1
-            imageData[i][j][2]-=temp2
-            """
+            imageData[i][j][0]=(int((imageData[i][j][0]+level_2)/level)*level)
+            imageData[i][j][1]=(int((imageData[i][j][1]+level_2)/level)*level)
+            imageData[i][j][2]=(int((imageData[i][j][2]+level_2)/level)*level)
     return imageData
 
 
 def FaceDection(imageData):
     #臉部偵測
     face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
-    face_cascade.load("D:\python_face_detect\haarcascade_frontalface_default.xml")
+    face_cascade.load("C:\\Users\\pan\\Desktop\\ImageProcessing\\haarcascade_frontalface_default.xml")
     # 讀取圖片
     img = imageData
     # 轉成灰階圖片
