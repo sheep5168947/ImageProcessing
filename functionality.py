@@ -86,8 +86,8 @@ def ghostup(inputpath):
 
 def combine(inputpath):
     global gx, gy, flag
-    textx=0
-    texty=0
+    textx = 0
+    texty = 0
     x = 0
     y = 0
     # 讀檔 ------------------------------------
@@ -97,7 +97,7 @@ def combine(inputpath):
     basemap.sort(key=lambda x: int(x[5:-4]))
 
     # ------------------------------------------
-    count = 0
+
 
     facePos = [-1, -1, -1, -1]
     # 隨機選一個特效----------------------------
@@ -126,15 +126,15 @@ def combine(inputpath):
             for j in range(len(faceList)):
                 dic = (faceList[j][0]-facePos[0])**2 + \
                     (faceList[j][1]-facePos[1])**2
-                if dic > minDic:
+                if dic < minDic:
                     minDic = dic
                     faceNum = j
             if faceNum != -1:
                 facePos = copy.deepcopy(faceList[faceNum])
             x = facePos[0]
             y = facePos[1]
-            textx = int(facePos[3]/2)
-            texty = int(facePos[2]/2)
+            textx = int(facePos[2]/2)
+            texty = int(facePos[3]/2)
         # 擷取臉部
 
         # 進行特效處理
@@ -151,22 +151,34 @@ def combine(inputpath):
 
             # 小人跑到特效那邊，並疊圖存在combine-img裡-------------------------
         if gx != x and gy != y:
-            if gx-x>0:
-                gx-=int((gx-x)/100)
+            if gx-x > 0:
+                gx -= 2
+                if gx - x < 0:
+                    gx = x
+            elif gx-x < 0:
+                gx += 2
+                if gx-x > 0:
+                    gx = x
             else:
-                gx-=int((gx-x)/100)
-            if gy-y>0:
-                gy-=int((gy-y)/100)
+                pass
+            if gy-y > 0:
+                gy -= 2
+                if gy - y < 0:
+                    gy = y
+            elif gy-y < 0:
+                gy += 2
+                if gy - y > 0:
+                    gy = y
             else:
-                gy-=int((gy-y)/100)
+                pass
             ghostjumpW, ghostjumpH = ghostjump(inputpath).size
             newwidth = int(basemapW/4)
             newheight = int(ghostjumpH/ghostjumpW*newwidth)
             newghostjump = ghostjump(inputpath).resize((newwidth, newheight))
             combine_img = Image.new('RGBA', basemapImg.size, (0, 0, 0, 0))
             combine_img.paste(basemapImg, (0, 0))
-            textx -= int(0.286*newwidth)
-            texty -= int(0.54*newheight)
+            textx -= int(0.54*newheight)
+            texty -= int(0.286*newwidth)
             combine_img.paste(
                 newghostjump, (gx+textx, gy+texty), mask=newghostjump)
             route = "combine_img/frame"+str(i)+".png"
@@ -184,8 +196,8 @@ def combine(inputpath):
                     combine_img = Image.new(
                         'RGBA', basemapImg.size, (0, 0, 0, 0))
                     combine_img.paste(basemapImg, (0, 0))
-                    textx -= int(0.286*newwidth)
-                    texty -= int(0.54*newheight)
+                    textx -= int(0.54*newheight)
+                    texty -= int(0.286*newwidth)
                     combine_img.paste(newghostleft, (gx+textx, gy+texty),
                                       mask=newghostleft)
                     route = "combine_img/frame"+str(i)+".png"
@@ -200,8 +212,8 @@ def combine(inputpath):
                     combine_img = Image.new(
                         'RGBA', basemapImg.size, (0, 0, 0, 0))
                     combine_img.paste(basemapImg, (0, 0))
-                    textx-=int(0.286*newwidth)
-                    texty-= int(0.54*newheight) 
+                    textx -= int(0.54*newheight)
+                    texty -= int(0.286*newwidth)
                     combine_img.paste(newghostright,  (gx+textx, gy+texty),
                                       mask=newghostright)
                     route = "combine_img/frame"+str(i)+".png"
@@ -216,8 +228,8 @@ def combine(inputpath):
                 combine_img = Image.new(
                     'RGBA', basemapImg.size, (0, 0, 0, 0))
                 combine_img.paste(basemapImg, (0, 0))
-                textx-=int(0.286*newwidth)
-                texty-= int(0.54*newheight) 
+                textx -= int(0.54*newheight)
+                texty -= int(0.286*newwidth)
                 combine_img.paste(newghostup,  (gx+textx, gy+texty),
                                   mask=newghostup)
                 route = "combine_img/frame"+str(i)+".png"
