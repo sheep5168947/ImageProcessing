@@ -2,11 +2,11 @@ import random
 import functionality
 import video2frames
 import frames2video
-
+import SpecialEffects
 
 # ------------------------------
 #宣告用
-videoname1 = 'drop3.avi'
+videoname1 = 'ohoh.mp4'
 inputpath = ['data','ghost']
 combineimg = "combine_img"
 outputname =  'newvideo.avi'
@@ -14,7 +14,7 @@ fps = 29
 
 # ------------------------------
 #影片轉成圖片
-# video2frames.video2frames(videoname1,0)
+#video2frames.video2frames(videoname1,0)
 
 # ------------------------------
 # 這裡把圖片放上小人
