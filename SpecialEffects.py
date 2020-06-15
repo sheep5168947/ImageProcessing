@@ -1,11 +1,12 @@
 import os
-import cv2 as cv
+import cv2 
+from cv2 import cv2 as cv2
 import numpy as np
 import time
 import copy
 def BlurFun(imageData,maskSize=5):
     # 模糊效果
-    #image= cv.imread("data\\frame0.bmp")
+    #image= cv2.imread("data\\frame0.bmp")
     image= imageData
     #temp= np.array([[[0]*3]*len(image[0])]*len(image), dtype=np.int16)
     temp= np.array(imageData, dtype=np.int16)
@@ -42,7 +43,7 @@ def BlurFun(imageData,maskSize=5):
             
     tEnd = time.time()
     #print ("B cost %f sec" % (tEnd - tStart))
-    #cv.imshow('new_image5',new_image)
+    #cv2.imshow('new_image5',new_image)
     return new_image
 
 
@@ -133,12 +134,12 @@ def hierarchyColor(imageData,level):
 
 def FaceDection(imageData):
     #臉部偵測
-    face_cascade = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     face_cascade.load("C:\\Users\\pan\\Desktop\\ImageProcessing\\haarcascade_frontalface_default.xml")
     # 讀取圖片
     img = imageData
     # 轉成灰階圖片
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # 偵測臉部
     faces = face_cascade.detectMultiScale(
         gray,
@@ -161,13 +162,15 @@ def SplitPicture(imageData,Pos,shape="square"):
         #print(len(temp),len(temp[0]))
         for j in range(h):
             for i in range(w):
+                if y+j>=len(imageData) or x+i>=len(imageData[0]):
+                    continue
                 temp[j][i][0]=imageData[y+j][x+i][0]
                 temp[j][i][1]=imageData[y+j][x+i][1]
                 temp[j][i][2]=imageData[y+j][x+i][2]
         #print(len(temp),len(temp[0]))
         return temp
     #切圓形
-    if shape=="cycle":
+    if shape=="circle":
         x=Pos[0]#圓心
         y=Pos[1]#圓心
         r=Pos[2]#半徑
@@ -177,15 +180,19 @@ def SplitPicture(imageData,Pos,shape="square"):
         #對temp賦予值
         for j in range(r*2):
             for i in range(r*2):
-                
+                #超出範圍
+                if y-r+j-1>=len(imageData) or x-r+i-1>=len(imageData[0]):
+                    continue
                 dis=(j-r)**2+(i-r)**2
+                #在圓外
                 if dis>r_Q:
                     temp[j][i][3]=0
                     continue  
-                
                 temp[j][i][0]=imageData[y-r+j][x-r+i][0]
                 temp[j][i][1]=imageData[y-r+j][x-r+i][1]
                 temp[j][i][2]=imageData[y-r+j][x-r+i][2]
+                temp[j][i][3]=255#這裡好像噴錯
+                #index 3 is out of bounds for axis 0 with size 3
         #print(len(temp),len(temp[0]))
         return temp
 

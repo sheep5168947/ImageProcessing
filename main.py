@@ -14,7 +14,7 @@ fps = 29
 
 # ------------------------------
 #影片轉成圖片
-#video2frames.video2frames(videoname1,0)
+video2frames.video2frames(videoname1,0)
 
 # ------------------------------
 # 這裡把圖片放上小人

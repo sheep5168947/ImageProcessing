@@ -4,7 +4,8 @@ from PIL import Image
 import SpecialEffects
 import random
 import copy
-import cv2 as cv
+import cv2
+from cv2 import cv2 as cv2
 # -------------------------------------
 # 全域變數
 cross = 20
@@ -84,8 +85,11 @@ def ghostup(inputpath):
     return ghostupImg
 
 
+facePos = [-1, -1, -1, -1]
+
+
 def combine(inputpath):
-    global gx, gy, flag
+    global gx, gy, flag, facePos
     textx = 0
     texty = 0
     x = 0
@@ -98,9 +102,6 @@ def combine(inputpath):
 
     # ------------------------------------------
 
-    facePos = [-1, -1, -1, -1]
-    # 隨機選一個特效----------------------------
-    chooseEffect = random.randint(0, 4)
     for i in range(len(basemap)):
         if i % 30 == 0:
             print('以處理', i)
@@ -109,69 +110,61 @@ def combine(inputpath):
         basemapImg = basemapImg.convert('RGBA')
         basemapW, basemapH = basemapImg.size
 
-        BI = cv.imread(inputpath[0] + '/' + basemap[i])
+        BI = cv2.imread(inputpath[0] + '/' + basemap[i])
         # 實做特效--------------------------------
         # 偵測臉部位置
         faceList = SpecialEffects.FaceDection(BI)
-        if facePos[0] == -1 and len(faceList) > 0:
-            # 表示目前沒有正在追蹤的臉
-            faceNum = random.randint(0, len(faceList)-1)
-            for j in range(4):
-                facePos[j] = faceList[faceNum][j]
-                print(faceList[faceNum][j])
-        else:
-            # 找到與上一張臉最相近的臉
-            faceNum = -1
-            minDic = 0
-            for j in range(len(faceList)):
-                dic = (faceList[j][0]-facePos[0])**2 + \
-                    (faceList[j][1]-facePos[1])**2
-                if dic < minDic:
-                    minDic = dic
-                    faceNum = j
-            if faceNum != -1:
-                for k in range(4):
-                    facePos[k] = faceList[faceNum][k]
-
+        # print(faceList)
+        if len(faceList) > 0:
+            if facePos[0] == -1:
+                # 表示目前沒有正在追蹤的臉
+                faceNum = random.randint(0, len(faceList)-1)
+                for j in range(4):
+                    facePos[j] = faceList[faceNum][j]
+            else:
+                # 目前有跟蹤的臉
+                # 找到與上一張臉最相近的臉yaaa
+                faceNum = 0  # 這裡是不是會一直蓋到
+                minDic = (faceList[0][0]-facePos[0])**2 + \
+                    (faceList[0][1]-facePos[1])**2
+                for j in range(len(faceList)):
+                    dic = (faceList[j][0]-facePos[0])**2 + \
+                        (faceList[j][1]-facePos[1])**2
+                    if dic < minDic:
+                        minDic = dic
+                        faceNum = j
+                if faceNum != -1:
+                    for L in range(4):
+                        facePos[L] = faceList[faceNum][L]
             x = facePos[0]
             y = facePos[1]
-            textx = int(facePos[2]/2)
-            texty = int(facePos[3]/2)
+        # print(i,x,y)
+        textx = int(facePos[2]/2)
+        texty = int(facePos[3]/2)
         # 擷取臉部
 
-        # 進行特效處理
-        # if chooseEffect == 0:
-        #     # 放大
-        # elif chooseEffect == 1:
-        #     asd
-        # elif chooseEffect == 2:
-
-        # elif chooseEffect == 3:
-
-        # elif chooseEffect == 4:
-            # 將特效後的臉進行圓形切割
-
-            # 小人跑到特效那邊，並疊圖存在combine-img裡-------------------------
-        print(x,y)
-        if gx != x and gy != y:
-            if gx-x > 0:
-                gx -= 2
-                if gx - x < 0:
-                    gx = x
-            elif gx-x < 0:
-                gx += 2
-                if gx-x > 0:
-                    gx = x
+        # 小人跑到特效那邊，並疊圖存在combine-img裡-------------------------
+        deltaX = abs(gx-x)
+        deltaY = abs(gy-y)
+        if deltaX > 30 or deltaY > 30:
+            if gx-x > 30:
+                gx -= 5
+                if gx - x < 30:
+                    pass
+            elif gx-x < 30:
+                gx += 5
+                if gx-x > 30:
+                    pass
             else:
                 pass
-            if gy-y > 0:
-                gy -= 2
-                if gy - y < 0:
-                    gy = y
-            elif gy-y < 0:
-                gy += 2
-                if gy - y > 0:
-                    gy = y
+            if gy-y > 30:
+                gy -= 5
+                if gy - y < 30:
+                    pass
+            elif gy-y < 30:
+                gy += 5
+                if gy - y > 30:
+                    pass
             else:
                 pass
             ghostjumpW, ghostjumpH = ghostjump(inputpath).size
@@ -204,33 +197,63 @@ def combine(inputpath):
                 route = "combine_img/frame"+str(i)+".png"
                 combine_img.save(route)
                 flag = 1
-                # else:
-                #     ghostrightW, ghostrightH = ghostright(inputpath).size
-                #     newwidth = int(basemapW/4)
-                #     newheight = int(ghostrightH/ghostrightW*newwidth)
-                #     newghostright = ghostright(
-                #         inputpath).resize((newwidth, newheight))
-                #     combine_img = Image.new(
-                #         'RGBA', basemapImg.size, (0, 0, 0, 0))
-                #     combine_img.paste(basemapImg, (0, 0))
-                #     textx -= int(0.54*newheight)
-                #     texty -= int(0.286*newwidth)
-                #     combine_img.paste(newghostright,  (gx+textx, gy+texty),
-                #                       mask=newghostright)
-                #     route = "combine_img/frame"+str(i)+".png"
-                #     combine_img.save(route)
-                #     flag = 1
             elif flag == 1:
+                # 這裡寫特效+疊圖--------------
+
                 ghostupW, ghostupH = ghostup(inputpath).size
                 newwidth = int(basemapW/4)
                 newheight = int(ghostupH/ghostupW*newwidth)
                 newghostup = ghostup(
                     inputpath).resize((newwidth, newheight))
+
+                # 隨機選一個特效----------------------------
+                chooseEffect = random.randint(0, 4)
+                # 將進行圓形切割
+                split = cv2.imread(
+                    inputpath[0] + '/' + basemap[i], cv2.IMREAD_UNCHANGED)
+
+                splitPos = [gx+textx, gy+texty, int(newheight/2),int(newheight/2)]
+
+                splitImg = SpecialEffects.SplitPicture(
+                    split, splitPos, "square")
+                splitImg=SpecialEffects.MosaicFun(splitImg)
+                splitPos = [int(newheight/4), int(newheight/4), int(newheight/2),int(newheight/2)]
+                splitImg=SpecialEffects.SplitPicture(
+                    split, splitPos, "circle")
+                cv2.imwrite("split/"+basemap[i], splitImg)  # test
+            
+                cover = SpecialEffects.cover(split, splitImg, splitPos)
+                cv2.imwrite(inputpath[0] + '/' + basemap[i], cover)
+
+                basemapImg = Image.open(inputpath[0] + '/' + basemap[i])  # 底圖
+                basemapImg = basemapImg.convert('RGBA')
+                basemapW, basemapH = basemapImg.size
+               # 進行特效處理
+                # if chooseEffect == 0:
+                #     # 放大
+                #     pass
+                # elif chooseEffect == 1:
+                #     # 模糊
+                #     pass
+                # elif chooseEffect == 2:
+                #     # 馬賽克
+
+                # pass
+                # elif chooseEffect == 3:
+                #     # 色階
+                # pass
+                # elif chooseEffect == 4:
+                #     # 縮小??
+                # pass
+
+            # ---------------------------
+
+                textx -= int(0.54*newheight)
+                texty -= int(0.286*newwidth)
+
                 combine_img = Image.new(
                     'RGBA', basemapImg.size, (0, 0, 0, 0))
                 combine_img.paste(basemapImg, (0, 0))
-                textx -= int(0.54*newheight)
-                texty -= int(0.286*newwidth)
                 combine_img.paste(newghostup,  (gx+textx, gy+texty),
                                   mask=newghostup)
                 route = "combine_img/frame"+str(i)+".png"
