@@ -13,7 +13,7 @@ def BlurFun(imageData,maskSize=5):
     new_image= copy.deepcopy(image)
     mask_size=maskSize
     mask_size_2=int(mask_size/2)
-    mask_size_Q=mask_size**2
+    mask_size_Q=mask_size**2+1
     tStart = time.time()
     for i in range(mask_size_2,len(image)-mask_size_2):
         for j in range(mask_size_2,len(image[0])-mask_size_2):
@@ -117,8 +117,7 @@ def MosaicFun(imageData,maskSize=10):
                 new_image[ai+i][aj][1]=SumG
                 new_image[ai+i][aj][2]=SumB  
     tEnd = time.time()
-    print(len(image),len(image[0]))
-    print("H,W=",maxHeight,maxWight)
+   
     #print ("B cost %f sec" % (tEnd - tStart))
     return new_image
 
@@ -126,6 +125,8 @@ def hierarchyColor(imageData,level):
     level_2=int(level/2)
     for i in range (len(imageData)):
         for j in range(len(imageData[0])):
+            if imageData[i][j][3]==0:
+                continue
             imageData[i][j][0]=(int((imageData[i][j][0]+level_2)/level)*level)
             imageData[i][j][1]=(int((imageData[i][j][1]+level_2)/level)*level)
             imageData[i][j][2]=(int((imageData[i][j][2]+level_2)/level)*level)
@@ -152,6 +153,34 @@ def FaceDection(imageData):
 def SplitPicture(imageData,Pos,shape="square"):
     #分割圖片
     #切正方形
+    x=Pos[0]
+    y=Pos[1]
+    w=Pos[2]#or 半徑
+    h=Pos[3]
+    newImage=np.array([[[0]*4]*len(imageData[0])]*len(imageData), dtype=np.uint8)
+    if shape=="square":
+        for i in range(h):
+            for j in range(w):
+                if i+y>=len(imageData)-1 or j+x>=len(imageData[0])-1:
+                        continue
+                for k in range(3):
+                    newImage[i+y][j+x][k]=imageData[i+y][j+x][k]
+                newImage[i+y][j+x][3]=255
+        return newImage
+    elif shape=="circle":
+        w_2=w**2
+        for i in range(w*2):
+            for j in range(w*2):
+                if i+y>=len(imageData)-1 or j+x>=len(imageData[0])-1:
+                    continue
+                dic=(i-w)**2+(j-w)**2
+                if dic>w_2:
+                    continue
+                for k in range(3):
+                    newImage[i+y][j+x][k]=imageData[i+y][j+x][k]
+                newImage[i+y][j+x][3]=255
+    return newImage
+    """
     if shape=="square":
         x=Pos[0]
         y=Pos[1]
@@ -194,12 +223,13 @@ def SplitPicture(imageData,Pos,shape="square"):
                 temp[j][i][3]=255#這裡好像噴錯
                 #index 3 is out of bounds for axis 0 with size 3
         #print(len(temp),len(temp[0]))
-        return temp
+        
+        return temp"""
 
 def cover(orginImage,covered,Pos):
     #將原圖片覆蓋上其他圖片
     channalNum=len(covered[0][0])
-    
+    newImage=np.array([[[0]*4]*len(orginImage[0])]*len(orginImage), dtype=np.uint8)
     x=Pos[0]
     y=Pos[1]
     for i in range(len(covered)):

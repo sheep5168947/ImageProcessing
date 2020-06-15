@@ -6,6 +6,7 @@ import random
 import copy
 import cv2
 from cv2 import cv2 as cv2
+import Effect
 # -------------------------------------
 # 全域變數
 cross = 20
@@ -16,7 +17,8 @@ gu = 0
 gx = 0
 gy = 360
 flag = 0
-
+count = 0
+rem = 0
 # --------------------------------------
 # 定義那些放大啥小的功能
 
@@ -89,7 +91,7 @@ facePos = [-1, -1, -1, -1]
 
 
 def combine(inputpath):
-    global gx, gy, flag, facePos
+    global gx, gy, flag, facePos,count,rem
     textx = 0
     texty = 0
     x = 0
@@ -146,29 +148,33 @@ def combine(inputpath):
         # 小人跑到特效那邊，並疊圖存在combine-img裡-------------------------
         deltaX = abs(gx-x)
         deltaY = abs(gy-y)
-        if deltaX > 30 or deltaY > 30:
-            if gx-x > 30:
+        if deltaX > 15 or deltaY > 15:
+            if gx-x > 15:
                 gx -= 5
-                if gx - x < 30:
+                if gx - x < 15:
+                    gx = x
                     pass
-            elif gx-x < 30:
+            elif gx-x < 15:
                 gx += 5
-                if gx-x > 30:
+                if gx-x > 15:
+                    gx = x
                     pass
             else:
                 pass
-            if gy-y > 30:
+            if gy-y > 15:
                 gy -= 5
-                if gy - y < 30:
+                if gy - y < 15:
+                    gy = y
                     pass
-            elif gy-y < 30:
+            elif gy-y < 15:
                 gy += 5
-                if gy - y > 30:
+                if gy - y > 15:
+                    gy = y
                     pass
             else:
                 pass
             ghostjumpW, ghostjumpH = ghostjump(inputpath).size
-            newwidth = int(basemapW/4)
+            newwidth = int(basemapW/3)
             newheight = int(ghostjumpH/ghostjumpW*newwidth)
             newghostjump = ghostjump(inputpath).resize((newwidth, newheight))
             combine_img = Image.new('RGBA', basemapImg.size, (0, 0, 0, 0))
@@ -181,82 +187,78 @@ def combine(inputpath):
             combine_img.save(route)
             flag = 0
         else:
-            if flag == 0:
-                ghostleftW, ghostleftH = ghostleft(inputpath).size
-                newwidth = int(basemapW/4)
-                newheight = int(ghostleftH/ghostleftW*newwidth)
-                newghostleft = ghostleft(inputpath).resize(
-                    (newwidth, newheight))
-                combine_img = Image.new(
-                    'RGBA', basemapImg.size, (0, 0, 0, 0))
-                combine_img.paste(basemapImg, (0, 0))
-                textx -= int(0.54*newheight)
-                texty -= int(0.286*newwidth)
-                combine_img.paste(newghostleft, (gx+textx, gy+texty),
-                                  mask=newghostleft)
-                route = "combine_img/frame"+str(i)+".png"
-                combine_img.save(route)
-                flag = 1
-            elif flag == 1:
-                # 這裡寫特效+疊圖--------------
 
-                ghostupW, ghostupH = ghostup(inputpath).size
-                newwidth = int(basemapW/4)
-                newheight = int(ghostupH/ghostupW*newwidth)
-                newghostup = ghostup(
-                    inputpath).resize((newwidth, newheight))
+            # 這裡寫特效+疊圖--------------
 
-                # 隨機選一個特效----------------------------
-                chooseEffect = random.randint(0, 4)
-                # 將進行圓形切割
-                split = cv2.imread(
-                    inputpath[0] + '/' + basemap[i], cv2.IMREAD_UNCHANGED)
+            ghostupW, ghostupH = ghostup(inputpath).size
+            newwidth = int(basemapW/3)
+            newheight = int(ghostupH/ghostupW*newwidth)
+            newghostup = ghostup(
+                inputpath).resize((newwidth, newheight))
 
-                splitPos = [gx+textx, gy+texty, int(newheight/2),int(newheight/2)]
-
-                splitImg = SpecialEffects.SplitPicture(
-                    split, splitPos, "square")
-                splitImg=SpecialEffects.MosaicFun(splitImg)
-                splitPos = [int(newheight/4), int(newheight/4), int(newheight/2),int(newheight/2)]
-                splitImg=SpecialEffects.SplitPicture(
-                    split, splitPos, "circle")
-                cv2.imwrite("split/"+basemap[i], splitImg)  # test
+            # 隨機選一個特效----------------------------
             
-                cover = SpecialEffects.cover(split, splitImg, splitPos)
-                cv2.imwrite(inputpath[0] + '/' + basemap[i], cover)
+            if count == 0 :
+                chooseEffect = random.randint(0, 3)
+            elif count == 120:
+                count = 0
+            else:
+                count+=1
+            # 將進行圓形切割
+            split = cv2.imread(
+                inputpath[0] + '/' + basemap[i], cv2.IMREAD_UNCHANGED)
 
-                basemapImg = Image.open(inputpath[0] + '/' + basemap[i])  # 底圖
-                basemapImg = basemapImg.convert('RGBA')
-                basemapW, basemapH = basemapImg.size
-               # 進行特效處理
-                # if chooseEffect == 0:
-                #     # 放大
-                #     pass
-                # elif chooseEffect == 1:
-                #     # 模糊
-                #     pass
-                # elif chooseEffect == 2:
-                #     # 馬賽克
+            splitPos = [facePos[0]-int(newwidth/4-facePos[2]/2), facePos[1]-int(
+                newheight/4-facePos[3]/2), int(newheight/2), int(newheight/2)]
+            splitImg = SpecialEffects.SplitPicture(
+                split, splitPos, "square")
 
-                # pass
-                # elif chooseEffect == 3:
-                #     # 色階
-                # pass
-                # elif chooseEffect == 4:
-                #     # 縮小??
-                # pass
+            
+            if chooseEffect == 0:
+                splitImg = Effect.Negtive(splitImg)
+                # 負片
+                pass
+            elif chooseEffect == 1:
+                splitImg = SpecialEffects.BlurFun(splitImg)
+                # 模糊
+                pass
+            elif chooseEffect == 2:
+                # 馬賽克
+                splitImg = SpecialEffects.MosaicFun(splitImg)
+                pass
+            elif chooseEffect == 3:
+                splitImg = SpecialEffects.hierarchyColor(splitImg, 60)
+                # 色階
+                pass
+            # elif chooseEffect == 4:
+            #     splitImg = Effect.Zoom(splitImg,1.2)
+            #     # 放大
+            #     pass
+
+            splitPos[2] = int(splitPos[2]/2)
+            splitImg = SpecialEffects.SplitPicture(
+                splitImg, splitPos, "circle")
+            cv2.imwrite("split/"+basemap[i], splitImg)  # test
+
+            cover = SpecialEffects.cover(split, splitImg, [0, 0])
+            cv2.imwrite(inputpath[0] + '/' + basemap[i], cover)
+
+            basemapImg = Image.open(inputpath[0] + '/' + basemap[i])  # 底圖
+            basemapImg = basemapImg.convert('RGBA')
+            basemapW, basemapH = basemapImg.size
+           # 進行特效處理
 
             # ---------------------------
 
-                textx -= int(0.54*newheight)
-                texty -= int(0.286*newwidth)
+            textx -= int(0.54*newheight)
+            texty -= int(0.286*newwidth)
 
-                combine_img = Image.new(
-                    'RGBA', basemapImg.size, (0, 0, 0, 0))
-                combine_img.paste(basemapImg, (0, 0))
-                combine_img.paste(newghostup,  (gx+textx, gy+texty),
-                                  mask=newghostup)
-                route = "combine_img/frame"+str(i)+".png"
-                combine_img.save(route)
+            combine_img = Image.new(
+                'RGBA', basemapImg.size, (0, 0, 0, 0))
+            combine_img.paste(basemapImg, (0, 0))
+            combine_img.paste(newghostup,  (gx+textx, gy+texty),
+                              mask=newghostup)
+            route = "combine_img/frame"+str(i)+".png"
+            combine_img.save(route)
 
     return

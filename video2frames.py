@@ -14,5 +14,5 @@ def video2frames(videoname, num):
         else:
             cv2.imwrite(path[1]+"/frame%d.png" % count, image)
         success, image = vidcap.read()
-        print('Read a new frame: ', success)
         count += 1
+    print('影片轉照片結束')
