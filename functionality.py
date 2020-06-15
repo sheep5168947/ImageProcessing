@@ -98,7 +98,6 @@ def combine(inputpath):
 
     # ------------------------------------------
 
-
     facePos = [-1, -1, -1, -1]
     # 隨機選一個特效----------------------------
     chooseEffect = random.randint(0, 4)
@@ -119,6 +118,7 @@ def combine(inputpath):
             faceNum = random.randint(0, len(faceList)-1)
             for j in range(4):
                 facePos[j] = faceList[faceNum][j]
+                print(faceList[faceNum][j])
         else:
             # 找到與上一張臉最相近的臉
             faceNum = -1
@@ -130,7 +130,9 @@ def combine(inputpath):
                     minDic = dic
                     faceNum = j
             if faceNum != -1:
-                facePos = copy.deepcopy(faceList[faceNum])
+                for k in range(4):
+                    facePos[k] = faceList[faceNum][k]
+
             x = facePos[0]
             y = facePos[1]
             textx = int(facePos[2]/2)
@@ -150,6 +152,7 @@ def combine(inputpath):
             # 將特效後的臉進行圓形切割
 
             # 小人跑到特效那邊，並疊圖存在combine-img裡-------------------------
+        print(x,y)
         if gx != x and gy != y:
             if gx-x > 0:
                 gx -= 2
@@ -185,40 +188,38 @@ def combine(inputpath):
             combine_img.save(route)
             flag = 0
         else:
-            raisehand = random.randint(0, 1)
             if flag == 0:
-                if raisehand == 0:
-                    ghostleftW, ghostleftH = ghostleft(inputpath).size
-                    newwidth = int(basemapW/4)
-                    newheight = int(ghostleftH/ghostleftW*newwidth)
-                    newghostleft = ghostleft(inputpath).resize(
-                        (newwidth, newheight))
-                    combine_img = Image.new(
-                        'RGBA', basemapImg.size, (0, 0, 0, 0))
-                    combine_img.paste(basemapImg, (0, 0))
-                    textx -= int(0.54*newheight)
-                    texty -= int(0.286*newwidth)
-                    combine_img.paste(newghostleft, (gx+textx, gy+texty),
-                                      mask=newghostleft)
-                    route = "combine_img/frame"+str(i)+".png"
-                    combine_img.save(route)
-                    flag = 1
-                else:
-                    ghostrightW, ghostrightH = ghostright(inputpath).size
-                    newwidth = int(basemapW/4)
-                    newheight = int(ghostrightH/ghostrightW*newwidth)
-                    newghostright = ghostright(
-                        inputpath).resize((newwidth, newheight))
-                    combine_img = Image.new(
-                        'RGBA', basemapImg.size, (0, 0, 0, 0))
-                    combine_img.paste(basemapImg, (0, 0))
-                    textx -= int(0.54*newheight)
-                    texty -= int(0.286*newwidth)
-                    combine_img.paste(newghostright,  (gx+textx, gy+texty),
-                                      mask=newghostright)
-                    route = "combine_img/frame"+str(i)+".png"
-                    combine_img.save(route)
-                    flag = 1
+                ghostleftW, ghostleftH = ghostleft(inputpath).size
+                newwidth = int(basemapW/4)
+                newheight = int(ghostleftH/ghostleftW*newwidth)
+                newghostleft = ghostleft(inputpath).resize(
+                    (newwidth, newheight))
+                combine_img = Image.new(
+                    'RGBA', basemapImg.size, (0, 0, 0, 0))
+                combine_img.paste(basemapImg, (0, 0))
+                textx -= int(0.54*newheight)
+                texty -= int(0.286*newwidth)
+                combine_img.paste(newghostleft, (gx+textx, gy+texty),
+                                  mask=newghostleft)
+                route = "combine_img/frame"+str(i)+".png"
+                combine_img.save(route)
+                flag = 1
+                # else:
+                #     ghostrightW, ghostrightH = ghostright(inputpath).size
+                #     newwidth = int(basemapW/4)
+                #     newheight = int(ghostrightH/ghostrightW*newwidth)
+                #     newghostright = ghostright(
+                #         inputpath).resize((newwidth, newheight))
+                #     combine_img = Image.new(
+                #         'RGBA', basemapImg.size, (0, 0, 0, 0))
+                #     combine_img.paste(basemapImg, (0, 0))
+                #     textx -= int(0.54*newheight)
+                #     texty -= int(0.286*newwidth)
+                #     combine_img.paste(newghostright,  (gx+textx, gy+texty),
+                #                       mask=newghostright)
+                #     route = "combine_img/frame"+str(i)+".png"
+                #     combine_img.save(route)
+                #     flag = 1
             elif flag == 1:
                 ghostupW, ghostupH = ghostup(inputpath).size
                 newwidth = int(basemapW/4)
